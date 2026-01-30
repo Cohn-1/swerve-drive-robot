@@ -1,0 +1,57 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.commands;
+
+import static frc.robot.Constants.OperatorConstants.*;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.SwerveDrive;
+
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+public class Drive extends Command {
+  /** Creates a new Drive. */
+  SwerveDrive driveSubsystem;
+  CommandXboxController controller;
+
+  public Drive(SwerveDrive driveSystem, CommandXboxController driverController) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(driveSystem);
+    driveSubsystem = driveSystem;
+    controller = driverController;
+  }
+
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+  }
+
+  // Called every time the scheduler runs while the command is scheduled.
+  // The Y axis of the controller is inverted so that pushing the
+  // stick away from you (a negative value) drives the robot forwards (a positive
+  // value). The X axis is scaled down so the rotation is more easily
+  // controllable.
+  @Override
+  public void execute() {
+    double vx = -controller.getLeftY() * DRIVE_SCALING;    // ileri/geri
+        double vy = -controller.getLeftX() * DRIVE_SCALING;    // sağ/sol
+        double omega = -controller.getRightX() * ROTATION_SCALING; // dönme
+
+        // Field-oriented sürüş aktif, gyro açı ölçüsünü gönder
+        driveSubsystem.drive(vx, vy, omega, true, driveSubsystem.getRotation2d());
+  }
+
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    driveSubsystem.drive(0, 0, 0, false, driveSubsystem.getRotation2d());
+  }
+
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+}
